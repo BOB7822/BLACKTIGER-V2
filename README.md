@@ -109,19 +109,9 @@ All tools are accessible through an elegant terminal-based menu system with anim
 
 ## 🚀 Installation
 
-### One-Liner Install
 
-```bash
-git clone https://github.com/BOB7822/BLACKTIGER-V2.git ~/blacktiger && cd ~/blacktiger && python3 main_menu.py
-```
 
-### With Dependencies
-
-```bash
-git clone https://github.com/BOB7822/BLACKTIGER-V2.git ~/blacktiger && cd ~/blacktiger && pip3 install -r requirements.txt && python3 main_menu.py
-```
-
-### Manual Install
+###  Install
 
 ```bash
 git clone https://github.com/BOB7822/BLACKTIGER-V2.git
