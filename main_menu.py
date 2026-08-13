@@ -299,6 +299,7 @@ def menu(page=1):
             f"{W}│  {BOLD}[24]{RESET} Password Encrypt     │{RESET}",
             f"{W}│  {BOLD}[25]{RESET} Hash Generator       │{RESET}",
             f"{W}│  {BOLD}[26]{RESET} Search Database      │{RESET}",
+            f"{W}│  {BOLD}[42]{RESET} Discord Username Gen  │{RESET}",
             f"{W}│  {BOLD}[27]{RESET} Dark Web Links       │{RESET}",
             f"{W}│  {BOLD}[28]{RESET} IP Generator         │{RESET}",
             f"{W}└──────────────────────────────────────┘{RESET}"
@@ -487,7 +488,7 @@ def run():
             choice = input().strip().lower()
             
             if choice == 'q':
-                print(f"\n{W}Goodbye!{RESET}")
+                print(f"\n{W}LEAVING{RESET}")
                 break
             elif choice == 'blacktiger' or choice == 'bt':
                 show_blacktiger()
@@ -517,6 +518,9 @@ def run():
                 else:
                     print(f"\n{M}Already on first page{RESET}")
                     time.sleep(0.5)
+            elif choice in ['42']:
+                import module_42_discord_username
+                    module_42_discord_username.run()
             elif choice in ['01', '1']:
                 import module_01_obfuscator
                 module_01_obfuscator.run()
