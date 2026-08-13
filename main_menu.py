@@ -211,9 +211,9 @@ def show_blacktiger():
     for line in TIGER_LOGO:
         print(center(f"{Y}{line}{RESET}", width))
     print(center(f"{G}═══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════{RESET}", width))
-    print(center(f"{W}                     BLACK TIGER PRO ULTIMATE EDITION{RESET}", width))
+    print(center(f"{W}                     BLACK TIGER v2 {RESET}", width))
     print(center(f"{G}═══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════{RESET}", width))
-    print(center(f"{M}                         made by BLACKTOOLOFFICIAL{RESET}", width))
+    print(center(f"{M}                         made by BOB{RESET}", width))
     print(center(f"{M}                    Discord.gg/nvbQsxFJgz{RESET}", width))
     time.sleep(2)
 
@@ -251,7 +251,7 @@ def menu_banner(page=1):
     elif page == 3:
         print(center(f"{W}{BOLD}                     ██  BLACK TIGER V2.0 - ATTACK PAGE  ██{RESET}", width))
     print(center(f"{G}{border}{RESET}", width))
-    print(center(f"{M}                         made by BLACKTOOLOFFICIAL{RESET}", width))
+    print(center(f"{M}                         made by BOB{RESET}", width))
     print(center(f"{M}                    Discord.gg/nvbQsxFJgz{RESET}", width))
     print(center(f"{D}                   Type 'h' for help | 'q' to quit{RESET}", width))
     print()
