@@ -27,6 +27,8 @@ def run():
     
     for k, v in info.items():
         print(f"  {k}: {v}")
+    
+    input("\nPress Enter to continue...")
 
 if __name__ == "__main__":
     run()
