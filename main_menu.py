@@ -1,12 +1,7 @@
-import os
-import sys
-import time
-import platform
-import subprocess
-import importlib
-import shutil
-import re
-import random
+#!/usr/bin/env python3
+# BlackTiger Pro V2.0 - Main Menu
+
+import os, sys, time, platform, re
 
 W = "\033[38;2;255;255;255m"
 G = "\033[38;2;180;180;180m"
@@ -15,9 +10,6 @@ D = "\033[38;2;70;70;70m"
 B = "\033[38;2;40;40;40m"
 BOLD = "\033[1m"
 RESET = "\033[0m"
-R = "\033[38;2;255;0;0m"
-Y = "\033[38;2;255;255;0m"
-C = "\033[38;2;0;255;255m"
 
 def clear():
     os.system('cls' if platform.system() == "Windows" else 'clear')
@@ -53,190 +45,6 @@ LOGO = [
     f"{G}                   ░          ░        ░  ░    ░    ░  ░              ░        ░     ░  ░   ░",
 ]
 
-EYE = [
-    f"{M}",
-    f"{W}     .-._   _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ .-.{RESET}",
-    f"{W}    /     ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` `     \\{RESET}",
-    f"{W}   |    _..----.._                                                                                      _..----.._    |{RESET}",
-    f"{W}   |  .'          `.                                                                                  .'          `.  |{RESET}",
-    f"{W}   | /  /\      /\  \\                                                                                /  /\      /\  \\ |{RESET}",
-    f"{W}   || |  o|    | o|  ||                                                                              || |  o|    | o|  ||{RESET}",
-    f"{W}   || |  __|    | __|  ||                                                                              || |  __|    | __|  ||{RESET}",
-    f"{W}   ||  \\   /  /\\  \\   /  ||                                                                              ||  \\   /  /\\  \\   /  ||{RESET}",
-    f"{W}   |  \\  `.'  (__)  `.'  /  |                                                                            |  \\  `.'  (__)  `.'  /  |{RESET}",
-    f"{W}   |   `.  \\  `----'  /  .'   |                                                                          |   `.  \\  `----'  /  .'   |{RESET}",
-    f"{W}   |    `-.`--------'.-'    |                                                                          |    `-.`--------'.-'    |{RESET}",
-    f"{W}   |       `--------'       |                                                                          |       `--------'       |{RESET}",
-    f"{W}   \\                       /                                                                          \\                       /{RESET}",
-    f"{W}    `.                   .'                                                                            `.                   .'{RESET}",
-    f"{W}      `-._           _.-'                                                                                `-._           _.-'{RESET}",
-    f"{W}          `---------´                                                                                      `---------´{RESET}",
-    f"{C}═══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════{RESET}",
-]
-
-SKULL = [
-    f"{R}",
-    f"{R}   .-. .-. .-. .-. .-. .-. .-. .-. .-. .-. .-. .-. .-. .-. .-. .-. .-. .-. .-. .-. .-. .-. .-. .-. .-. .-. .-. .-.{RESET}",
-    f"{R}   | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | |{RESET}",
-    f"{R}   `-' `-' `-' `-' `-' `-' `-' `-' `-' `-' `-' `-' `-' `-' `-' `-' `-' `-' `-' `-' `-' `-' `-' `-' `-' `-' `-' `-'{RESET}",
-    f"{R}   .-. .-. .-. .-. .-. .-. .-. .-. .-. .-. .-. .-. .-. .-. .-. .-. .-. .-. .-. .-. .-. .-. .-. .-. .-. .-. .-. .-.{RESET}",
-    f"{R}   | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | |{RESET}",
-    f"{R}   `-' `-' `-' `-' `-' `-' `-' `-' `-' `-' `-' `-' `-' `-' `-' `-' `-' `-' `-' `-' `-' `-' `-' `-' `-' `-' `-' `-'{RESET}",
-    f"{R}   .-. .-. .-. .-. .-. .-. .-. .-. .-. .-. .-. .-. .-. .-. .-. .-. .-. .-. .-. .-. .-. .-. .-. .-. .-. .-. .-. .-.{RESET}",
-    f"{R}   | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | |{RESET}",
-    f"{R}   `-' `-' `-' `-' `-' `-' `-' `-' `-' `-' `-' `-' `-' `-' `-' `-' `-' `-' `-' `-' `-' `-' `-' `-' `-' `-' `-' `-'{RESET}",
-]
-
-BLACKTIGER = [
-    f"{Y}",
-    f"{Y}   _...----.._{RESET}",
-    f"{Y} .-'           `-.{RESET}",
-    f"{Y}.'  _..----.._     `.{RESET}",
-    f"{Y}/  .'          `.     \\{RESET}",
-    f"{Y}|  /  /\\      /\\  \\     |{RESET}",
-    f"{Y}|| |  o|    | o|  |    ||{RESET}",
-    f"{Y}|| |  __|    | __|  |    ||{RESET}",
-    f"{Y}||  \\   /  /\\  \\   /     ||{RESET}",
-    f"{Y}|  \\  `.'  (__)  `.'  /  |{RESET}",
-    f"{Y} `.  \\  `----'  /  .'   {RESET}",
-    f"{Y}   `-.`--------'.-'{RESET}",
-    f"{Y}      `--------'{RESET}",
-    f"{G}═══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════{RESET}",
-    f"{W}                                                                                                                     {RESET}",
-    f"{W}  ____  _        _    ____ _  _______ ___  ____ _____ ____                                                          {RESET}",
-    f"{W} | __ )| |      / \\  / ___| |/ /_   _|_ _|/ ___| ____|  _ \\                                                         {RESET}",
-    f"{W} |  _ \\| |     / _ \\| |   | ' /  | |  | || |  _|  _| | |_) |                                                        {RESET}",
-    f"{W} | |_) | |___ / ___ \\ |___| . \\  | |  | || |_| | |___|  _ <                                                         {RESET}",
-    f"{W} |____/|_____/_/   \\_\\____|_|\\_\\ |_| |___|\\____|_____|_| \\_\\                                                        {RESET}",
-    f"{W}                                                                                                                     {RESET}",
-    f"{W}  __  __ _   _ _   _____ ___   _____ ___   ___  _                                                                   {RESET}",
-    f"{W} |  \\/  | | | | | |_   _|_ _| |_   _/ _ \\ / _ \\| |                                                                  {RESET}",
-    f"{W} | |\\/| | | | | |   | |  | |    | || | | | | | | |                                                                  {RESET}",
-    f"{W} | |  | | |_| | |___| |  | |    | || |_| | |_| | |___                                                               {RESET}",
-    f"{W} |_|  |_|\\___/|_____|_| |___|   |_| \\___/ \\___/|_____|                                                              {RESET}",
-    f"{G}═══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════{RESET}",
-]
-
-TIGER_LOGO = [
-    f"{Y}",
-    f"{Y}   _...----.._{RESET}",
-    f"{Y} .-'           `-.{RESET}",
-    f"{Y}.'  _..----.._     `.{RESET}",
-    f"{Y}/  .'          `.     \\{RESET}",
-    f"{Y}|  /  /\\      /\\  \\     |{RESET}",
-    f"{Y}|| |  o|    | o|  |    ||{RESET}",
-    f"{Y}|| |  __|    | __|  |    ||{RESET}",
-    f"{Y}||  \\   /  /\\  \\   /     ||{RESET}",
-    f"{Y}|  \\  `.'  (__)  `.'  /  |{RESET}",
-    f"{Y} `.  \\  `----'  /  .'   {RESET}",
-    f"{Y}   `-.`--------'.-'{RESET}",
-    f"{Y}      `--------'{RESET}",
-]
-
-def animate_osint():
-    width = get_width()
-    clear()
-    for line in LOGO:
-        print(center(f"{W}{BOLD}{line}{RESET}", width))
-    border = "═══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════"
-    print(center(f"{G}{border}{RESET}", width))
-    print(center(f"{W}{BOLD}                     ██  BLACK TIGER V2.0 - OSINT PAGE  ██{RESET}", width))
-    print(center(f"{G}{border}{RESET}", width))
-    print()
-    for i in range(3):
-        for line in EYE:
-            if i == 0:
-                print(center(f"{D}{line}{RESET}", width))
-            elif i == 1:
-                print(center(f"{M}{line}{RESET}", width))
-            else:
-                print(center(f"{C}{line}{RESET}", width))
-        time.sleep(0.15)
-    for _ in range(2):
-        time.sleep(0.1)
-        clear()
-        for line in LOGO:
-            print(center(f"{W}{BOLD}{line}{RESET}", width))
-        print(center(f"{G}{border}{RESET}", width))
-        print(center(f"{W}{BOLD}                     ██  BLACK TIGER V2.0 - OSINT PAGE  ██{RESET}", width))
-        print(center(f"{G}{border}{RESET}", width))
-        print()
-        for line in EYE:
-            print(center(f"{D}{line}{RESET}", width))
-        time.sleep(0.05)
-        clear()
-        for line in LOGO:
-            print(center(f"{W}{BOLD}{line}{RESET}", width))
-        print(center(f"{G}{border}{RESET}", width))
-        print(center(f"{W}{BOLD}                     ██  BLACK TIGER V2.0 - OSINT PAGE  ██{RESET}", width))
-        print(center(f"{G}{border}{RESET}", width))
-        print()
-        for line in EYE:
-            print(center(f"{C}{line}{RESET}", width))
-        time.sleep(0.1)
-    print()
-    print(center(f"{G}═══════════════════════════════════════════════════════════════════════════════════════════════{RESET}", width))
-    print(center(f"{W}                     OSINT MODULE LOADED SUCCESSFULLY{RESET}", width))
-    print(center(f"{G}═══════════════════════════════════════════════════════════════════════════════════════════════{RESET}", width))
-    time.sleep(0.8)
-
-def animate_attack():
-    width = get_width()
-    clear()
-    for line in LOGO:
-        print(center(f"{W}{BOLD}{line}{RESET}", width))
-    border = "═══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════"
-    print(center(f"{G}{border}{RESET}", width))
-    print(center(f"{W}{BOLD}                     ██  BLACK TIGER V2.0 - ATTACK PAGE  ██{RESET}", width))
-    print(center(f"{G}{border}{RESET}", width))
-    print()
-    for i in range(3):
-        for line in SKULL:
-            if i == 0:
-                print(center(f"{D}{line}{RESET}", width))
-            elif i == 1:
-                print(center(f"{M}{line}{RESET}", width))
-            else:
-                print(center(f"{R}{line}{RESET}", width))
-        time.sleep(0.15)
-    print()
-    print(center(f"{G}═══════════════════════════════════════════════════════════════════════════════════════════════{RESET}", width))
-    print(center(f"{W}                     ATTACK MODULE LOADED SUCCESSFULLY{RESET}", width))
-    print(center(f"{G}═══════════════════════════════════════════════════════════════════════════════════════════════{RESET}", width))
-    time.sleep(0.8)
-
-def show_blacktiger():
-    width = get_width()
-    clear()
-    for line in TIGER_LOGO:
-        print(center(f"{Y}{line}{RESET}", width))
-    print(center(f"{G}═══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════{RESET}", width))
-    print(center(f"{W}                     BLACK TIGER v2 {RESET}", width))
-    print(center(f"{G}═══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════{RESET}", width))
-    print(center(f"{M}                         made by BOB{RESET}", width))
-    print(center(f"{M}                    Discord.gg/nvbQsxFJgz{RESET}", width))
-    time.sleep(2)
-
-def show_skull():
-    width = get_width()
-    clear()
-    for line in SKULL:
-        print(center(f"{R}{line}{RESET}", width))
-    print(center(f"{G}═══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════{RESET}", width))
-    print(center(f"{W}                     DEATH AWAITS ALL WHO ENTER{RESET}", width))
-    print(center(f"{G}═══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════{RESET}", width))
-    time.sleep(2)
-
-def show_eye():
-    width = get_width()
-    clear()
-    for line in EYE:
-        print(center(f"{C}{line}{RESET}", width))
-    print(center(f"{G}═══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════{RESET}", width))
-    print(center(f"{W}                     THE EYE SEES ALL{RESET}", width))
-    print(center(f"{G}═══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════{RESET}", width))
-    time.sleep(2)
-
 def menu_banner(page=1):
     clear()
     width = get_width()
@@ -251,7 +59,7 @@ def menu_banner(page=1):
     elif page == 3:
         print(center(f"{W}{BOLD}                     ██  BLACK TIGER V2.0 - ATTACK PAGE  ██{RESET}", width))
     print(center(f"{G}{border}{RESET}", width))
-    print(center(f"{M}                         made by BOB{RESET}", width))
+    print(center(f"{M}                         made by BLACKTOOLOFFICIAL{RESET}", width))
     print(center(f"{M}                    Discord.gg/nvbQsxFJgz{RESET}", width))
     print(center(f"{D}                   Type 'h' for help | 'q' to quit{RESET}", width))
     print()
@@ -299,7 +107,6 @@ def menu(page=1):
             f"{W}│  {BOLD}[24]{RESET} Password Encrypt     │{RESET}",
             f"{W}│  {BOLD}[25]{RESET} Hash Generator       │{RESET}",
             f"{W}│  {BOLD}[26]{RESET} Search Database      │{RESET}",
-            f"{W}│  {BOLD}[42]{RESET} Discord Username Gen  │{RESET}",
             f"{W}│  {BOLD}[27]{RESET} Dark Web Links       │{RESET}",
             f"{W}│  {BOLD}[28]{RESET} IP Generator         │{RESET}",
             f"{W}└──────────────────────────────────────┘{RESET}"
@@ -385,6 +192,7 @@ def menu(page=1):
             f"{W}│  {BOLD}[58]{RESET} Censys Search        │{RESET}",
             f"{W}│  {BOLD}[59]{RESET} Wayback Machine      │{RESET}",
             f"{W}│  {BOLD}[60]{RESET} Email Reputation     │{RESET}",
+            f"{W}│  {BOLD}[42]{RESET} 4-Letter User Gen    │{RESET}",
             f"{W}└─────────────────────────────────────┘{RESET}"
         ]
         
@@ -488,25 +296,13 @@ def run():
             choice = input().strip().lower()
             
             if choice == 'q':
-                print(f"\n{W}LEAVING{RESET}")
-                break
-            elif choice == 'blacktiger' or choice == 'bt':
-                show_blacktiger()
-            elif choice == 'skull':
-                show_skull()
-            elif choice == 'eye':
-                show_eye()
-            elif choice == 'l':
-                print(f"\n{W}Leaving...{RESET}")
-                time.sleep(1)
+                print(f"\n{W}Goodbye!{RESET}")
                 break
             elif choice == 'n':
                 if page == 1:
                     page = 2
-                    animate_osint()
                 elif page == 2:
                     page = 3
-                    animate_attack()
                 else:
                     print(f"\n{M}Already on last page{RESET}")
                     time.sleep(0.5)
@@ -518,9 +314,6 @@ def run():
                 else:
                     print(f"\n{M}Already on first page{RESET}")
                     time.sleep(0.5)
-            elif choice in ['42']:
-                import module_42_discord_username
-                    module_42_discord_username.run()
             elif choice in ['01', '1']:
                 import module_01_obfuscator
                 module_01_obfuscator.run()
@@ -581,6 +374,9 @@ def run():
             elif choice in ['20']:
                 import module_20_email_gen
                 module_20_email_gen.run()
+            elif choice in ['21']:
+                import module_21_instagram
+                module_21_instagram.run()
             elif choice in ['22']:
                 import module_22_phishing
                 module_22_phishing.run()
@@ -641,6 +437,9 @@ def run():
             elif choice in ['41']:
                 import module_41_udp
                 module_41_udp.run()
+            elif choice in ['42']:
+                import module_42_discord_username
+                module_42_discord_username.run()
             elif choice in ['51']:
                 import module_51_whois
                 module_51_whois.run()
@@ -756,12 +555,8 @@ def run():
                 print(f"\n{W}Help:{RESET}")
                 print(f"{M}Enter the number of the module you want to run{RESET}")
                 print(f"{M}Type 'n' for next page, 'b' for previous page{RESET}")
-                print(f"{M}Type 'blacktiger' or 'bt' for BlackTiger logo{RESET}")
-                print(f"{M}Type 'skull' for Skull art{RESET}")
-                print(f"{M}Type 'eye' for Eye art{RESET}")
-                print(f"{M}Type 'l' to leave{RESET}")
                 print(f"{M}Type 'q' to quit{RESET}")
-                time.sleep(3)
+                time.sleep(2)
             else:
                 print(f"\n{W}Invalid choice!{RESET}")
                 time.sleep(1)
