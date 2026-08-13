@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # System Info Module
 
-import platform, os, socket
+import platform, os, socket, sys
 
 def run():
     print("\n" + "="*60)
