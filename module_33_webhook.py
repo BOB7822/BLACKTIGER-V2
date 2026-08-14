@@ -48,7 +48,6 @@ def run():
     count = int(input("Number of messages [10]: ").strip() or "10")
     delay = float(input("Delay between messages [0.5]: ").strip() or "0.5")
     
-    # Random messages
     random_messages = [
         "BlackTiger Pro",
         "Webhook Spammer",
