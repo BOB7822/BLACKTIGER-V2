@@ -48,6 +48,7 @@ def run():
     count = int(input("Number of messages [10]: ").strip() or "10")
     delay = float(input("Delay between messages [0.5]: ").strip() or "0.5")
     
+    # Random messages
     random_messages = [
         "BlackTiger Pro",
         "Webhook Spammer",
@@ -160,7 +161,7 @@ def run():
     print(f"Total: {success_count + fail_count}")
     print("="*60)
     
-    if fail_count > 0:
+    if fail_count > 0 and success_count == 0:
         print("\n[!] Troubleshooting:")
         print("1. Make sure the webhook URL is correct")
         print("2. The webhook must be from the same server you're in")
