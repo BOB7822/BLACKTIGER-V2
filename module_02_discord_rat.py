@@ -1,4 +1,4 @@
-mport os, sys, time, base64, random, string, platform, socket, psutil
+import os, sys, time, base64, random, string, platform, socket, psutil
 
 def run():
     print("\n" + "="*60)
