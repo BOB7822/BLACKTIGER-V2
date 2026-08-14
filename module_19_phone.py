@@ -1,5 +1,7 @@
+#!/usr/bin/env python3
 
-import re, sys, os, requests, json
+
+import re, sys, os, requests, json, subprocess
 
 def run():
     print("\n" + "="*60)
@@ -21,509 +23,258 @@ def run():
     print(f"\n[+] Looking up: {phone}")
     print("[+] Gathering information...\n")
     
-    d)
+    # Clean the number
+    clean_number = re.sub(r'[^0-9+]', '', phone)
+    
+    # Check format
+    if clean_number.startswith('+'):
+        print(f"Format: International - {clean_number}")
+    elif clean_number.isdigit():
+        print(f"Format: Local - {clean_number}")
+    else:
+        print(f"Format: Unknown")
+    
+    print("\n" + "="*60)
+    print("LOOKUP RESULTS")
+    print("="*60)
+    
+    # 1. Try WHOIS lookup if available
+    print("\n[1] WHOIS Lookup:")
     try:
-        # Clean the number - remove spaces and special chars except +
-        clean_number = re.sub(r'[^0-9+]', '', phone)
+        result = subprocess.run(['whois', clean_number], capture_output=True, text=True, timeout=5)
+        if result.stdout:
+            lines = result.stdout.split('\n')[:10]
+            for line in lines:
+                if ':' in line and not line.startswith('%') and not line.startswith('#'):
+                    print(f"    {line}")
+    except:
+        print("    WHOIS not available")
+    
+    # 2. Try online lookup services (no API keys)
+    print("\n[2] Online Lookup:")
+    services = [
+        {
+            'url': f"https://www.freecarrierlookup.com/phone/{clean_number}",
+            'name': 'FreeCarrierLookup'
+        },
+        {
+            'url': f"https://www.verifyemailaddress.org/phone-validator/phone/{clean_number}",
+            'name': 'Phone Validator'
+        }
+    ]
+    
+    for service in services:
+        try:
+            response = requests.get(service['url'], timeout=5, headers={'User-Agent': 'Mozilla/5.0'})
+            print(f"    {service['name']}: HTTP {response.status_code}")
+        except:
+            print(f"    {service['name']}: Timeout")
+    
+    # 3. Check carrier info for US numbers
+    print("\n[3] Carrier/Country Info:")
+    
+    # US numbers
+    if clean_number.startswith('+1') and len(clean_number) >= 10:
+        area_code = clean_number[-10:][:3]
+        print(f"    Area Code: {area_code}")
         
-        print("[1] Checking number format...")
+        # Area code to state mapping
+        area_states = {email
+            '201': 'New Jersey', '202': 'District of Columbia', '203': 'Connecticut',
+            '205': 'Alabama', '206': 'Washington', '207': 'Maine',
+            '208': 'Idaho', '209': 'California', '210': 'Texas',
+            '212': 'New York', '213': 'California', '214': 'Texas',
+            '215': 'Pennsylvania', '216': 'Ohio', '217': 'Illinois',
+            '218': 'Minnesota', '219': 'Indiana', '220': 'Ohio',
+            '224': 'Illinois', '225': 'Louisiana', '228': 'Mississippi',
+            '229': 'Georgia', '231': 'Michigan', '234': 'Ohio',
+            '239': 'Florida', '240': 'Maryland', '248': 'Michigan',
+            '251': 'Alabama', '252': 'North Carolina', '253': 'Washington',
+            '254': 'Texas', '256': 'Alabama', '260': 'Indiana',
+            '262': 'Wisconsin', '267': 'Pennsylvania', '269': 'Michigan',
+            '270': 'Kentucky', '272': 'Pennsylvania', '276': 'Virginia',
+            '281': 'Texas', '283': 'Ohio', '301': 'Maryland',
+            '302': 'Delaware', '303': 'Colorado', '304': 'West Virginia',
+            '305': 'Florida', '307': 'Wyoming', '308': 'Nebraska',
+            '309': 'Illinois', '310': 'California', '312': 'Illinois',
+            '313': 'Michigan', '314': 'Missouri', '315': 'New York',
+            '316': 'Kansas', '317': 'Indiana', '318': 'Louisiana',
+            '319': 'Iowa', '320': 'Minnesota', '321': 'Florida',
+            '323': 'California', '325': 'Texas', '327': 'Ohio',
+            '330': 'Ohio', '331': 'Illinois', '334': 'Alabama',
+            '336': 'North Carolina', '337': 'Louisiana', '339': 'Massachusetts',
+            '341': 'California', '346': 'Texas', '347': 'New York',
+            '351': 'Massachusetts', '352': 'Florida', '360': 'Washington',
+            '361': 'Texas', '364': 'Kentucky', '380': 'Ohio',
+            '385': 'Utah', '386': 'Florida', '401': 'Rhode Island',
+            '402': 'Nebraska', '404': 'Georgia', '405': 'Oklahoma',
+            '406': 'Montana', '407': 'Florida', '408': 'California',
+            '409': 'Texas', '410': 'Maryland', '412': 'Pennsylvania',
+            '413': 'Massachusetts', '414': 'Wisconsin', '415': 'California',
+            '417': 'Missouri', '419': 'Ohio', '423': 'Tennessee',
+            '424': 'California', '425': 'Washington', '430': 'Texas',
+            '432': 'Texas', '434': 'Virginia', '435': 'Utah',
+            '437': 'Ohio', '440': 'Ohio', '441': 'Ohio',
+            '442': 'California', '443': 'Maryland', '445': 'Pennsylvania',
+            '447': 'Illinois', '448': 'Florida', '450': 'Georgia',
+            '458': 'Oregon', '463': 'Indiana', '464': 'Illinois',
+            '469': 'Texas', '470': 'Georgia', '472': 'North Carolina',
+            '475': 'Connecticut', '478': 'Georgia', '479': 'Arkansas',
+            '480': 'Arizona', '484': 'Pennsylvania'
+        }
         
-        
-        if clean_number.startswith('+'):
-            print(f"    International format: {clean_number}")
-        elif clean_number.isdigit():
-            print(f"    Local format: {clean_number}")
-            print("    [i] Try adding country code for better results")
+        if area_code in area_states:
+            print(f"    State: {area_states[area_code]}")
         else:
-            print("    [i] Number contains invalid characters")
-        
-        # Method 2: Try using free API (ip-api.com for location)
-        print("\n[2] Checking location...")
-        try:
-            # Try to get location from IP if number is US
-            if clean_number.startswith('+1') or len(clean_number) == 10:
-                # For US numbers, try to get area code info
-                area_code = clean_number[-10:][:3] if len(clean_number) >= 10 else "Unknown"
-                if area_code != "Unknown":
-                    print(f"    Area Code: {area_code}")
-                    
-                    
-                    response = requests.get(f"http://ip-api.com/json/", timeout=5)
-                    if response.status_code == 200:
-                        data = response.json()
-                        print(f"    Region: {data.get('regionName', 'Unknown')}")
-                        print(f"    City: {data.get('city', 'Unknown')}")
-                        print(f"    Country: {data.get('country', 'Unknown')}")
+            print(f"    State: Unknown")
+    
+    # International
+    elif clean_number.startswith('+44'):
+        print("    Country: United Kingdom")
+    elif clean_number.startswith('+61'):
+        print("    Country: Australia")
+    elif clean_number.startswith('+81'):
+        print("    Country: Japan")
+    elif clean_number.startswith('+86'):
+        print("    Country: China")
+    elif clean_number.startswith('+91'):
+        print("    Country: India")
+    elif clean_number.startswith('+33'):
+        print("    Country: France")
+    elif clean_number.startswith('+49'):
+        print("    Country: Germany")
+    elif clean_number.startswith('+39'):
+        print("    Country: Italy")
+    elif clean_number.startswith('+34'):
+        print("    Country: Spain")
+    elif clean_number.startswith('+55'):
+        print("    Country: Brazil")
+    elif clean_number.startswith('+7'):
+        print("    Country: Russia")
+    elif clean_number.startswith('+82'):
+        print("    Country: South Korea")
+    elif clean_number.startswith('+31'):
+        print("    Country: Netherlands")
+    elif clean_number.startswith('+46'):
+        print("    Country: Sweden")
+    elif clean_number.startswith('+47'):
+        print("    Country: Norway")
+    elif clean_number.startswith('+45'):
+        print("    Country: Denmark")
+    elif clean_number.startswith('+358'):
+        print("    Country: Finland")
+    elif clean_number.startswith('+41'):
+        print("    Country: Switzerland")
+    elif clean_number.startswith('+43'):
+        print("    Country: Austria")
+    elif clean_number.startswith('+32'):
+        print("    Country: Belgium")
+    elif clean_number.startswith('+351'):email
+        print("    Country: Portugal")
+    elif clean_number.startswith('+30'):
+        print("    Country: Greece")
+    elif clean_number.startswith('+90'):
+        print("    Country: Turkey")
+    elif clean_number.startswith('+60'):
+        print("    Country: Malaysia")
+    elif clean_number.startswith('+65'):
+        print("    Country: Singapore")
+    elif clean_number.startswith('+66'):
+        print("    Country: Thailand")
+    elif clean_number.startswith('+84'):
+        print("    Country: Vietnam")
+    elif clean_number.startswith('+63'):
+        print("    Country: Philippines")
+    elif clean_number.startswith('+62'):
+        print("    Country: Indonesia")
+    elif clean_number.startswith('+56'):
+        print("    Country: Chile")
+    elif clean_number.startswith('+54'):
+        print("    Country: Argentina")
+    elif clean_number.startswith('+52'):
+        print("    Country: Mexico")
+    elif clean_number.startswith('+27'):
+        print("    Country: South Africa")
+    elif clean_number.startswith('+971'):
+        print("    Country: UAE")
+    elif clean_number.startswith('+966'):
+        print("    Country: Saudi Arabia")
+    elif clean_number.startswith('+1'):
+        print("    Country: US/Canada")
+    else:
+        print("    Country: Unknown")
+    
+    # 4. Try to get location from IP
+    print("\n[4] Location Info:")
+    try:email
+        response = requests.get("http://ip-api.com/json/", timeout=5)
+        if response.status_code == 200:
+            data = response.json()
+            if data.get('status') == 'success':
+                print(f"    City: {data.get('city', 'Unknown')}")
+                print(f"    Region: {data.get('regionName', 'Unknown')}")
+                print(f"    Country: {data.get('country', 'Unknown')}")
+                print(f"    ISP: {data.get('isp', 'Unknown')}")
             else:
-                print("    Location lookup only available for US numbers")
-        except:
-            pass
-        
-        # Method 3: Check carrier info
-        print("\n[3] Checking carrier info...")
-        try:
-            # Try to get carrier info using free API
-            if clean_number.startswith('+1'):
-                # US numbers - try to identify carrier
-                prefixes = {
-                    '201': 'AT&T',
-                    '202': 'Verizon',
-                    '203': 'AT&T',
-                    '205': 'AT&T',
-                    '206': 'AT&T',
-                    '207': 'Verizon',
-                    '208': 'AT&T',
-                    '209': 'AT&T',
-                    '210': 'AT&T',
-                    '212': 'Verizon',
-                    '213': 'AT&T',
-                    '214': 'AT&T',
-                    '215': 'Verizon',
-                    '216': 'AT&T',
-                    '217': 'AT&T',
-                    '218': 'AT&T',
-                    '219': 'AT&T',
-                    '220': 'AT&T',
-                    '224': 'AT&T',
-                    '225': 'AT&T',
-                    '228': 'AT&T',
-                    '229': 'AT&T',
-                    '231': 'AT&T',
-                    '234': 'AT&T',
-                    '239': 'AT&T',
-                    '240': 'Verizon',
-                    '248': 'AT&T',
-                    '251': 'AT&T',
-                    '252': 'AT&T',
-                    '253': 'AT&T',
-                    '254': 'AT&T',
-                    '256': 'AT&T',
-                    '260': 'AT&T',
-                    '262': 'AT&T',
-                    '267': 'Verizon',
-                    '269': 'AT&T',
-                    '270': 'AT&T',
-                    '272': 'AT&T',
-                    '276': 'AT&T',
-                    '281': 'AT&T',
-                    '283': 'AT&T',
-                    '301': 'Verizon',
-                    '302': 'Verizon',
-                    '303': 'Verizon',
-                    '304': 'Verizon',
-                    '305': 'AT&T',
-                    '307': 'Verizon',
-                    '308': 'Verizon',
-                    '309': 'Verizon',
-                    '310': 'AT&T',
-                    '312': 'AT&T',
-                    '313': 'AT&T',
-                    '314': 'AT&T',
-                    '315': 'Verizon',
-                    '316': 'AT&T',
-                    '317': 'AT&T',
-                    '318': 'AT&T',
-                    '319': 'Verizon',
-                    '320': 'Verizon',
-                    '321': 'AT&T',
-                    '323': 'AT&T',
-                    '325': 'AT&T',
-                    '327': 'AT&T',
-                    '330': 'AT&T',
-                    '331': 'AT&T',
-                    '334': 'AT&T',
-                    '336': 'AT&T',
-                    '337': 'AT&T',
-                    '339': 'AT&T',
-                    '341': 'AT&T',
-                    '346': 'AT&T',
-                    '347': 'Verizon',
-                    '351': 'AT&T',
-                    '352': 'AT&T',
-                    '360': 'Verizon',
-                    '361': 'AT&T',
-                    '364': 'AT&T',
-                    '380': 'AT&T',
-                    '385': 'AT&T',
-                    '386': 'AT&T',
-                    '401': 'Verizon',
-                    '402': 'Verizon',
-                    '404': 'AT&T',
-                    '405': 'AT&T',
-                    '406': 'AT&T',
-                    '407': 'AT&T',
-                    '408': 'AT&T',
-                    '409': 'AT&T',
-                    '410': 'Verizon',
-                    '412': 'Verizon',
-                    '413': 'Verizon',
-                    '414': 'Verizon',
-                    '415': 'AT&T',
-                    '417': 'AT&T',
-                    '419': 'AT&T',
-                    '423': 'AT&T',
-                    '424': 'AT&T',
-                    '425': 'AT&T',
-                    '430': 'AT&T',
-                    '432': 'AT&T',
-                    '434': 'AT&T',
-                    '435': 'AT&T',
-                    '437': 'AT&T',
-                    '440': 'AT&T',
-                    '441': 'AT&T',
-                    '442': 'AT&T',
-                    '443': 'Verizon',
-                    '445': 'AT&T',
-                    '447': 'AT&T',
-                    '448': 'AT&T',
-                    '450': 'AT&T',
-                    '458': 'AT&T',
-                    '463': 'AT&T',
-                    '464': 'AT&T',
-                    '469': 'AT&T',
-                    '470': 'AT&T',
-                    '472': 'AT&T',
-                    '475': 'AT&T',
-                    '478': 'AT&T',
-                    '479': 'AT&T',
-                    '480': 'AT&T',
-                    '484': 'Verizon',
-                    '501': 'AT&T',
-                    '502': 'AT&T',
-                    '503': 'Verizon',
-                    '504': 'AT&T',
-                    '505': 'AT&T',
-                    '507': 'AT&T',
-                    '508': 'Verizon',
-                    '509': 'AT&T',
-                    '510': 'AT&T',
-                    '512': 'AT&T',
-                    '513': 'AT&T',
-                    '515': 'Verizon',
-                    '516': 'Verizon',
-                    '517': 'AT&T',
-                    '518': 'Verizon',
-                    '520': 'AT&T',
-                    '530': 'AT&T',
-                    '531': 'AT&T',
-                    '534': 'AT&T',
-                    '539': 'AT&T',
-                    '540': 'AT&T',
-                    '541': 'AT&T',
-                    '551': 'Verizon',
-                    '559': 'AT&T',
-                    '561': 'AT&T',
-                    '562': 'AT&T',
-                    '563': 'Verizon',
-                    '564': 'AT&T',
-                    '567': 'AT&T',
-                    '570': 'Verizon',
-                    '571': 'Verizon',
-                    '573': 'AT&T',
-                    '574': 'AT&T',
-                    '575': 'AT&T',
-                    '579': 'AT&T',
-                    '580': 'AT&T',
-                    '585': 'AT&T',
-                    '586': 'AT&T',
-                    '601': 'AT&T',
-                    '602': 'AT&T',
-                    '603': 'Verizon',
-                    '605': 'AT&T',
-                    '606': 'AT&T',
-                    '607': 'Verizon',
-                    '608': 'AT&T',
-                    '609': 'Verizon',
-                    '610': 'Verizon',
-                    '612': 'AT&T',
-                    '614': 'AT&T',
-                    '615': 'AT&T',
-                    '616': 'AT&T',
-                    '617': 'Verizon',
-                    '618': 'AT&T',
-                    '619': 'AT&T',
-                    '620': 'AT&T',
-                    '623': 'AT&T',
-                    '626': 'AT&T',
-                    '627': 'AT&T',
-                    '628': 'AT&T',
-                    '629': 'AT&T',
-                    '630': 'AT&T',
-                    '631': 'Verizon',
-                    '636': 'AT&T',
-                    '640': 'AT&T',
-                    '641': 'AT&T',
-                    '646': 'Verizon',
-                    '650': 'AT&T',
-                    '651': 'Verizon',
-                    '657': 'AT&T',
-                    '659': 'AT&T',
-                    '660': 'AT&T',
-                    '661': 'AT&T',
-                    '662': 'AT&T',
-                    '667': 'AT&T',
-                    '669': 'AT&T',
-                    '670': 'Verizon',
-                    '671': 'Verizon',
-                    '678': 'AT&T',
-                    '679': 'AT&T',
-                    '680': 'AT&T',
-                    '681': 'Verizon',
-                    '682': 'AT&T',
-                    '683': 'AT&T',
-                    '689': 'AT&T',
-                    '701': 'AT&T',
-                    '702': 'AT&T',
-                    '703': 'Verizon',
-                    '704': 'AT&T',
-                    '706': 'AT&T',
-                    '707': 'AT&T',
-                    '708': 'AT&T',
-                    '712': 'Verizon',
-                    '713': 'AT&T',
-                    '714': 'AT&T',
-                    '715': 'AT&T',
-                    '716': 'Verizon',
-                    '717': 'Verizon',
-                    '718': 'Verizon',
-                    '719': 'AT&T',
-                    '720': 'Verizon',
-                    '724': 'Verizon',
-                    '725': 'AT&T',
-                    '726': 'AT&T',
-                    '727': 'AT&T',
-                    '731': 'AT&T',
-                    '732': 'Verizon',
-                    '734': 'AT&T',
-                    '737': 'AT&T',
-                    '740': 'AT&T',
-                    '743': 'AT&T',
-                    '747': 'AT&T',
-                    '752': 'AT&T',
-                    '754': 'AT&T',
-                    '757': 'Verizon',
-                    '760': 'AT&T',
-                    '762': 'AT&T',
-                    '763': 'AT&T',
-                    '764': 'AT&T',
-                    '765': 'AT&T',
-                    '769': 'AT&T',
-                    '770': 'AT&T',
-                    '772': 'AT&T',
-                    '773': 'AT&T',
-                    '774': 'AT&T',
-                    '775': 'AT&T',
-                    '779': 'AT&T',
-                    '781': 'Verizon',
-                    '785': 'AT&T',
-                    '786': 'AT&T',
-                    '787': 'AT&T',
-                    '801': 'Verizon',
-                    '802': 'Verizon',
-                    '803': 'AT&T',
-                    '804': 'Verizon',
-                    '805': 'AT&T',
-                    '806': 'AT&T',
-                    '808': 'AT&T',
-                    '810': 'AT&T',
-                    '812': 'AT&T',
-                    '813': 'AT&T',
-                    '814': 'Verizon',
-                    '815': 'AT&T',
-                    '816': 'AT&T',
-                    '817': 'AT&T',
-                    '818': 'AT&T',
-                    '820': 'AT&T',
-                    '825': 'AT&T',
-                    '826': 'AT&T',
-                    '828': 'AT&T',
-                    '830': 'AT&T',
-                    '831': 'AT&T',
-                    '832': 'AT&T',
-                    '833': 'AT&T',
-                    '834': 'AT&T',
-                    '835': 'AT&T',
-                    '836': 'AT&T',
-                    '838': 'Verizon',
-                    '840': 'AT&T',
-                    '843': 'AT&T',
-                    '845': 'Verizon',
-                    '847': 'AT&T',
-                    '848': 'Verizon',
-                    '850': 'AT&T',
-                    '854': 'AT&T',
-                    '856': 'Verizon',
-                    '857': 'Verizon',
-                    '858': 'AT&T',
-                    '859': 'AT&T',
-                    '860': 'Verizon',
-                    '862': 'Verizon',
-                    '863': 'AT&T',
-                    '864': 'AT&T',
-                    '865': 'AT&T',
-                    '870': 'AT&T',
-                    '872': 'AT&T',
-                    '873': 'AT&T',
-                    '878': 'Verizon',
-                    '901': 'AT&T',
-                    '902': 'AT&T',
-                    '903': 'AT&T',
-                    '904': 'AT&T',
-                    '906': 'AT&T',
-                    '907': 'AT&T',
-                    '908': 'Verizon',
-                    '909': 'AT&T',
-                    '910': 'AT&T',
-                    '912': 'AT&T',
-                    '913': 'AT&T',
-                    '914': 'Verizon',
-                    '915': 'AT&T',
-                    '916': 'AT&T',
-                    '917': 'Verizon',
-                    '918': 'AT&T',
-                    '919': 'AT&T',
-                    '920': 'AT&T',
-                    '925': 'AT&T',
-                    '928': 'AT&T',
-                    '929': 'Verizon',
-                    '930': 'AT&T',
-                    '931': 'AT&T',
-                    '934': 'AT&T',
-                    '935': 'AT&T',
-                    '936': 'AT&T',
-                    '937': 'AT&T',
-                    '938': 'AT&T',
-                    '939': 'AT&T',
-                    '940': 'AT&T',
-                    '941': 'AT&T',
-                    '945': 'AT&T',
-                    '947': 'AT&T',
-                    '948': 'AT&T',
-                    '949': 'AT&T',
-                    '951': 'AT&T',
-                    '952': 'Verizon',
-                    '954': 'AT&T',
-                    '956': 'AT&T',
-                    '959': 'AT&T',
-                    '970': 'AT&T',
-                    '971': 'Verizon',
-                    '972': 'AT&T',
-                    '973': 'Verizon',
-                    '975': 'AT&T',
-                    '978': 'Verizon',
-                    '979': 'AT&T',
-                    '980': 'AT&T',
-                    '984': 'AT&T',
-                    '985': 'AT&T',
-                    '986': 'AT&T',
-                    '989': 'AT&T'
-                }
-                
-                # Get first 3 digits of number (area code)
-                if len(clean_number) >= 10:
-                    area = clean_number[-10:][:3]
-                    if area in prefixes:
-                        print(f"    Carrier: {prefixes[area]}")
-                    else:
-                        print("    Carrier: Unknown")
-            else:
-                # International numbers - try to identify country
-                country_codes = {
-                    '+1': 'US/Canada',
-                    '+44': 'UK',
-                    '+61': 'Australia',
-                    '+81': 'Japan',
-                    '+86': 'China',
-                    '+91': 'India',
-                    '+33': 'France',
-                    '+49': 'Germany',
-                    '+39': 'Italy',
-                    '+34': 'Spain',
-                    '+55': 'Brazil',
-                    '+7': 'Russia',
-                    '+82': 'South Korea',
-                    '+31': 'Netherlands',
-                    '+46': 'Sweden',
-                    '+47': 'Norway',
-                    '+45': 'Denmark',
-                    '+358': 'Finland',
-                    '+41': 'Switzerland',
-                    '+43': 'Austria',
-                    '+32': 'Belgium',
-                    '+351': 'Portugal',
-                    '+30': 'Greece',
-                    '+90': 'Turkey',
-                    '+60': 'Malaysia',
-                    '+65': 'Singapore',
-                    '+66': 'Thailand',
-                    '+84': 'Vietnam',
-                    '+63': 'Philippines',
-                    '+62': 'Indonesia',
-                    '+56': 'Chile',
-                    '+54': 'Argentina',
-                    '+52': 'Mexico',
-                    '+27': 'South Africa',
-                    '+971': 'UAE',
-                    '+966': 'Saudi Arabia'
-                }
-                
-                for code, country in country_codes.items():
-                    if clean_number.startswith(code):
-                        print(f"    Country: {country}")
-                        break
-                else:
-                    print("    Country: Unknown")
-        except:
-            pass
-        
-        
-        print("\n[4] Checking number type...")
-        if clean_number.startswith('+') and len(clean_number) >= 10:
-            # Check if it's a mobile number (rough guess)
-            if clean_number.startswith('+1'):
-                # US numbers - check if it's a mobile prefix
-                mobile_prefixes = ['201', '202', '203', '206', '212', '213', '214', '215', '216', '217', '218', '219']
-                area = clean_number[-10:][:3] if len(clean_number) >= 10 else ''
-                if area in mobile_prefixes:
-                    print("    Type: Likely Mobile")
-                else:
-                    print("    Type: Unknown")
-            elif clean_number.startswith('+44'):
-                # UK numbers - check if it starts with 7 (mobile)
-                if len(clean_number) >= 11:
-                    if clean_number[3] == '7':
-                        print("    Type: Likely Mobile")
-                    elif clean_number[3] == '2' or clean_number[3] == '3':
-                        print("    Type: Likely Landline")
-                    else:
-                        print("    Type: Unknown")
-            else:
-                print("    Type: Unknown")
+                print("    Could not get location")
         else:
-            print("    Type: Unknown")
-        
-        print("\n" + "="*60)
-        print("SUMMARY")
-        print("="*60)
-        print(f"Number: {clean_number}")
-        
-        
-        try:
-            location_response = requests.get(f"http://ip-api.com/json/", timeout=5)
-            if location_response.status_code == 200:
-                loc_data = location_response.json()
-                print(f"Location: {loc_data.get('city', 'Unknown')}, {loc_data.get('regionName', 'Unknown')}, {loc_data.get('country', 'Unknown')}")
-        except:
-            pass
-        
-        print("="*60)
-        
-    except Exception as e:
-        print(f"[!] Error during lookup: {e}")
-        print("\n[!] For more detailed phone lookups, try:")
-        print("  - https://www.whitepages.com/phone/" + phone)
-        print("  - https://www.spytox.com/phone-number-lookup")
-        print("  - https://www.numverify.com/ (requires API key)")
+            print("    Could not get location")
+    except:
+        print("    Could not get location")
+    
+    # 5. Check if number is likely mobile or landline
+    print("\n[5] Number Type:")
+    if clean_number.startswith('+1') and len(clean_number) >= 10:
+        # US mobile prefixes
+        mobile_prefixes = ['201', '202', '203', '205', '206', '207', '208', '209', '210',
+                          '212', '213', '214', '215', '216', '217', '218', '219', '224',
+                          '225', '228', '229', '231', '234', '239', '240', '248', '251',
+                          '252', '253', '254', '256', '260', '262', '267', '269', '270',
+                          '272', '276', '281', '283', '301', '302', '303', '304', '305',
+                          '307', '308', '309', '310', '312', '313', '314', '315', '316',
+                          '317', '318', '319', '320', '321', '323', '325', '327', '330',
+                          '331', '334', '336', '337', '339', '341', '346', '347', '351',
+                          '352', '360', '361', '364', '380', '385', '386', '401', '402',
+                          '404', '405', '406', '407', '408', '409', '410', '412', '413',
+                          '414', '415', '417', '419', '423', '424', '425', '430', '432',
+                          '434', '435', '437', '440', '441', '442', '443', '445', '447',
+                          '448', '450', '458', '463', '464', '469', '470', '472', '475',
+                          '478', '479', '480', '484']
+        area = clean_number[-10:][:3] if len(clean_number) >= 10 else ''
+        if area in mobile_prefixes:
+            print("    Likely: Mobile")
+        else:
+            print("    Unknown")
+    elif clean_number.startswith('+44') and len(clean_number) >= 11:
+        if clean_number[3] == '7':
+            print("    Likely: Mobile")
+        elif clean_number[3] in ['2', '3']:
+            print("    Likely: Landline")
+        else:
+            print("    Unknown")
+    else:
+        print("    Unknown")
+    
+    # 6. Number validity
+    print("\n[6] Number Validity:")
+    if len(clean_number) >= 10:
+        print("    Format: Valid")
+    else:
+        print("    Format: Invalid (too short)")
+    
+    # Summary
+    print("\n" + "="*60)
+    print("SUMMARY")
+    print("="*60)
+    print(f"Number: {clean_number}")
+    print("="*60)
+    
+    # Direct links for manual lookup
+    print("\n[+] Manual lookup links:")
+    print(f"    Whitepages: https://www.whitepages.com/phone/{clean_number}")
+    print(f"    Spytox: https://www.spytox.com/phone-number-lookup/{clean_number}")
+    print(f"    Numverify (API): https://www.numverify.com/")
+    print(f"    Twilio Lookup: https://www.twilio.com/lookup")
     
     input("\nPress Enter to continue...")
 
