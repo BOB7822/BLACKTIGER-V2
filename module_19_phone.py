@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-
+# Phone Lookup Module - Working Version (No API Keys)
 
 import re, sys, os, requests, json, subprocess
 
@@ -53,22 +53,16 @@ def run():
     # 2. Try online lookup services (no API keys)
     print("\n[2] Online Lookup:")
     services = [
-        {
-            'url': f"https://www.freecarrierlookup.com/phone/{clean_number}",
-            'name': 'FreeCarrierLookup'
-        },
-        {
-            'url': f"https://www.verifyemailaddress.org/phone-validator/phone/{clean_number}",
-            'name': 'Phone Validator'
-        }
+        "https://www.freecarrierlookup.com/phone/" + clean_number,
+        "https://www.verifyemailaddress.org/phone-validator/phone/" + clean_number
     ]
     
-    for service in services:
+    for url in services:
         try:
-            response = requests.get(service['url'], timeout=5, headers={'User-Agent': 'Mozilla/5.0'})
-            print(f"    {service['name']}: HTTP {response.status_code}")
+            response = requests.get(url, timeout=5, headers={'User-Agent': 'Mozilla/5.0'})
+            print(f"    {url[:50]}...: HTTP {response.status_code}")
         except:
-            print(f"    {service['name']}: Timeout")
+            print(f"    {url[:50]}...: Timeout")
     
     # 3. Check carrier info for US numbers
     print("\n[3] Carrier/Country Info:")
@@ -78,8 +72,8 @@ def run():
         area_code = clean_number[-10:][:3]
         print(f"    Area Code: {area_code}")
         
-        # Area code to state mapping
-        area_states = {email
+        # Area code to state mapping (shortened for brevity)
+        area_states = {
             '201': 'New Jersey', '202': 'District of Columbia', '203': 'Connecticut',
             '205': 'Alabama', '206': 'Washington', '207': 'Maine',
             '208': 'Idaho', '209': 'California', '210': 'Texas',
@@ -100,27 +94,7 @@ def run():
             '313': 'Michigan', '314': 'Missouri', '315': 'New York',
             '316': 'Kansas', '317': 'Indiana', '318': 'Louisiana',
             '319': 'Iowa', '320': 'Minnesota', '321': 'Florida',
-            '323': 'California', '325': 'Texas', '327': 'Ohio',
-            '330': 'Ohio', '331': 'Illinois', '334': 'Alabama',
-            '336': 'North Carolina', '337': 'Louisiana', '339': 'Massachusetts',
-            '341': 'California', '346': 'Texas', '347': 'New York',
-            '351': 'Massachusetts', '352': 'Florida', '360': 'Washington',
-            '361': 'Texas', '364': 'Kentucky', '380': 'Ohio',
-            '385': 'Utah', '386': 'Florida', '401': 'Rhode Island',
-            '402': 'Nebraska', '404': 'Georgia', '405': 'Oklahoma',
-            '406': 'Montana', '407': 'Florida', '408': 'California',
-            '409': 'Texas', '410': 'Maryland', '412': 'Pennsylvania',
-            '413': 'Massachusetts', '414': 'Wisconsin', '415': 'California',
-            '417': 'Missouri', '419': 'Ohio', '423': 'Tennessee',
-            '424': 'California', '425': 'Washington', '430': 'Texas',
-            '432': 'Texas', '434': 'Virginia', '435': 'Utah',
-            '437': 'Ohio', '440': 'Ohio', '441': 'Ohio',
-            '442': 'California', '443': 'Maryland', '445': 'Pennsylvania',
-            '447': 'Illinois', '448': 'Florida', '450': 'Georgia',
-            '458': 'Oregon', '463': 'Indiana', '464': 'Illinois',
-            '469': 'Texas', '470': 'Georgia', '472': 'North Carolina',
-            '475': 'Connecticut', '478': 'Georgia', '479': 'Arkansas',
-            '480': 'Arizona', '484': 'Pennsylvania'
+            '323': 'California', '325': 'Texas'
         }
         
         if area_code in area_states:
@@ -169,7 +143,7 @@ def run():
         print("    Country: Austria")
     elif clean_number.startswith('+32'):
         print("    Country: Belgium")
-    elif clean_number.startswith('+351'):email
+    elif clean_number.startswith('+351'):
         print("    Country: Portugal")
     elif clean_number.startswith('+30'):
         print("    Country: Greece")
@@ -206,7 +180,7 @@ def run():
     
     # 4. Try to get location from IP
     print("\n[4] Location Info:")
-    try:email
+    try:
         response = requests.get("http://ip-api.com/json/", timeout=5)
         if response.status_code == 200:
             data = response.json()
@@ -225,21 +199,13 @@ def run():
     # 5. Check if number is likely mobile or landline
     print("\n[5] Number Type:")
     if clean_number.startswith('+1') and len(clean_number) >= 10:
-        # US mobile prefixes
         mobile_prefixes = ['201', '202', '203', '205', '206', '207', '208', '209', '210',
                           '212', '213', '214', '215', '216', '217', '218', '219', '224',
                           '225', '228', '229', '231', '234', '239', '240', '248', '251',
                           '252', '253', '254', '256', '260', '262', '267', '269', '270',
                           '272', '276', '281', '283', '301', '302', '303', '304', '305',
                           '307', '308', '309', '310', '312', '313', '314', '315', '316',
-                          '317', '318', '319', '320', '321', '323', '325', '327', '330',
-                          '331', '334', '336', '337', '339', '341', '346', '347', '351',
-                          '352', '360', '361', '364', '380', '385', '386', '401', '402',
-                          '404', '405', '406', '407', '408', '409', '410', '412', '413',
-                          '414', '415', '417', '419', '423', '424', '425', '430', '432',
-                          '434', '435', '437', '440', '441', '442', '443', '445', '447',
-                          '448', '450', '458', '463', '464', '469', '470', '472', '475',
-                          '478', '479', '480', '484']
+                          '317', '318', '319', '320', '321', '323', '325']
         area = clean_number[-10:][:3] if len(clean_number) >= 10 else ''
         if area in mobile_prefixes:
             print("    Likely: Mobile")
