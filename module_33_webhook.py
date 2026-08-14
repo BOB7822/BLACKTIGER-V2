@@ -1,33 +1,32 @@
+#!/usr/bin/env python3
+# Discord Webhook Spammer Module - Fixed
 
-
-import requests, time, random, sys, os
+import requests, time, random, sys, os, json
 
 def run():
     print("\n" + "="*60)
     print("DISCORD WEBHOOK SPAMMER")
     print("="*60)
     
+    print("[!] Webhook URL format: https://discord.com/api/webhooks/ID/TOKEN")
+    print("[!] Get it from: Server Settings > Integrations > Webhooks")
+    print("="*60)
     
-    
-    webhook_url = input("\nPaste your Webhook URL: ").strip()
+    webhook_url = input("\nWebhook URL: ").strip()
     
     # Validate webhook URL
     if not webhook_url.startswith('https://discord.com/api/webhooks/'):
-        print("\n[!] INVALID WEBHOOK URL!")
+        print("\n[!] Invalid webhook URL!")
         print("[!] Correct format: https://discord.com/api/webhooks/123456789/abcDEFghiJKL")
-        print("[!] You entered: " + webhook_url[:50] + "...")
-        print("\n[!] Make sure you copied the Webhook URL, not a channel URL")
-        print("[!] Channel URLs look like: https://discord.com/channels/...")
-        print("\nPress Enter to continue...")
-        input()
+        input("\nPress Enter to continue...")
         return
     
-    print("\n[+] Webhook URL looks valid!")
-    print("[+] Testing connection...")
-    
-    # Test the webhook
+    # Test the webhook first
+    print("\n[+] Testing webhook connection...")
     try:
-        test_response = requests.post(webhook_url, json={"content": "Testing connection..."})
+        test_payload = {"content": "Testing connection..."}
+        test_response = requests.post(webhook_url, json=test_payload, timeout=10)
+        
         if test_response.status_code in [200, 204]:
             print("[+] Webhook is working!")
         else:
@@ -35,11 +34,12 @@ def run():
             print("[!] Make sure the webhook is valid and not deleted")
             input("\nPress Enter to continue...")
             return
-    except:
-        print("[!] Could not connect to webhook")
+    except Exception as e:
+        print(f"[!] Could not connect: {e}")
         input("\nPress Enter to continue...")
         return
     
+    # Get spam settings
     print("\n" + "="*60)
     print("SPAM SETTINGS")
     print("="*60)
@@ -48,23 +48,26 @@ def run():
     count = int(input("Number of messages [10]: ").strip() or "10")
     delay = float(input("Delay between messages [0.5]: ").strip() or "0.5")
     
-                 if none provided
-    if not message:
-        messages = [
-            "BlackTiger ",
-            "Webhook Spammer",
-            "Discord Tools",
-            "Hacked by BlackTiger",
-            "This is a test message",
-            "BlackTiger V2.0",
-            "Discord Webhook Spammer",
-            "https://github.com/BOB7822/BLACKTIGER-V2",
-            "Join Discord.gg/nvbQsxFJgz",
-            "BlackTiger was here"
-        ]
+    # Random messages
+    random_messages = [
+        "BlackTiger Pro",
+        "Webhook Spammer",
+        "Discord Tools",
+        "Hacked by BlackTiger",
+        "This is a test message",
+        "BlackTiger V2.0",
+        "Discord Webhook Spammer",
+        "https://github.com/BOB7822/BLACKTIGER-V2",
+        "Join Discord.gg/nvbQsxFJgz",
+        "BlackTiger was here",
+        "Hello from BlackTiger!",
+        "Webhook testing...",
+        "Discord API is fun!",
+        "BlackTiger Ultimate Edition"
+    ]
     
     print("\n" + "="*60)
-    print("SPAMMING...")
+    print("SENDING MESSAGES...")
     print("="*60)
     print(f"Target: {webhook_url[:50]}...")
     print(f"Messages: {count}")
@@ -81,7 +84,7 @@ def run():
             if message:
                 msg = message
             else:
-                msg = random.choice(messages)
+                msg = random.choice(random_messages)
             
             # Build payload
             payload = {
@@ -94,11 +97,7 @@ def run():
             response = requests.post(webhook_url, json=payload, timeout=10)
             
             # Handle response
-            if response.status_code == 204:
-                success_count += 1
-                print(f"[OK] Message {i+1}/{count} sent")
-                
-            elif response.status_code == 200:
+            if response.status_code in [200, 204]:
                 success_count += 1
                 print(f"[OK] Message {i+1}/{count} sent")
                 
@@ -123,20 +122,16 @@ def run():
             elif response.status_code == 404:
                 fail_count += 1
                 print(f"[FAIL] Webhook not found or deleted (404)")
-                print("[!] Create a new webhook")
                 break
                 
             elif response.status_code == 401:
                 fail_count += 1
                 print(f"[FAIL] Invalid webhook token (401)")
-                print("[!] Check if the webhook URL is correct")
                 break
                 
             else:
                 fail_count += 1
                 print(f"[FAIL] Message {i+1}/{count} failed: {response.status_code}")
-                if response.status_code == 400:
-                    print("[!] Bad request - message might be too long")
             
             time.sleep(delay)
             
@@ -166,15 +161,12 @@ def run():
     print(f"Total: {success_count + fail_count}")
     print("="*60)
     
-    if fail_count > 0 and success_count == 0:
-        print("\n[!] All messages failed!")
-        print("\nTROUBLESHOOTING:")
-        print("1. Check that your webhook URL is correct")
-        print("2. Make sure the webhook hasn't been deleted")
-        print("3. Check your internet connection")
-        print("4. Try using a different webhook")
-        print("\nWebhook URL format:")
-        print("https://discord.com/api/webhooks/ID/TOKEN")
+    if fail_count > 0:
+        print("\n[!] Troubleshooting:")
+        print("1. Make sure the webhook URL is correct")
+        print("2. The webhook must be from the same server you're in")
+        print("3. Check that the webhook hasn't been deleted")
+        print("4. You might be rate limited - wait a few seconds")
     
     input("\nPress Enter to continue...")
 
