@@ -9,7 +9,7 @@ def run():
     print("="*60)
     
     print("[!] Enter phone number with or without country code")
-    print("[!] Examples: +14155552671, 8483321129, 447911123456")
+    print("[!] Examples: +14155552671, 447911123456")
     print("[!] This will show the phone's location and carrier")
     print("="*60)
     
